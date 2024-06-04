@@ -19,6 +19,7 @@ public class TimeRangeExtending : IGQIRowOperator, IGQIInputArguments, IGQIColum
     private TimeSpan _TimeRangeAfter;
 
 
+
     public GQIArgument[] GetInputArguments()
     {
         return new GQIArgument[] { _startColumnArg, _endColumnArg, _HoursBeforeColumnArg, _HoursAfterColumnArg };
