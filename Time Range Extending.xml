@@ -21,6 +21,8 @@
 			<Value><![CDATA[[Project:Time Range Extending_1]]]></Value>
 			<!--<Param type="debug">true</Param>-->
 			<Message></Message>
+      <Param type="preCompile">true</Param>
+      <Param type="libraryName">SLC-GQIO-RankIP</Param>
 		</Exe>
 	</Script>
 </DMSScript>
