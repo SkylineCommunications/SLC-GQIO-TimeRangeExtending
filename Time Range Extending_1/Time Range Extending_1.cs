@@ -6,23 +6,20 @@ public class TimeRangeExtending : IGQIRowOperator, IGQIInputArguments, IGQIColum
 {
     private readonly GQIColumnDropdownArgument _startColumnArg = new GQIColumnDropdownArgument("Start") { IsRequired = true, Types = new GQIColumnType[] { GQIColumnType.DateTime } };
     private readonly GQIColumnDropdownArgument _endColumnArg = new GQIColumnDropdownArgument("End") { IsRequired = true, Types = new GQIColumnType[] { GQIColumnType.DateTime } };
-    private readonly GQIIntArgument _HoursBeforeColumnArg = new GQIIntArgument("Amount of hours before") { IsRequired = true };
-    private readonly GQIIntArgument _HoursAfterColumnArg = new GQIIntArgument("Amount of hours after") { IsRequired = true };
+    private readonly GQIIntArgument _hoursBeforeColumnArg = new GQIIntArgument("Amount of hours before") { IsRequired = true };
+    private readonly GQIIntArgument _hoursAfterColumnArg = new GQIIntArgument("Amount of hours after") { IsRequired = true };
 
-    private readonly GQIDateTimeColumn _TimeFeedStart = new GQIDateTimeColumn("TimeRange Feed Start");
-    private readonly GQIDateTimeColumn _TimeFeedEnd = new GQIDateTimeColumn("TimeRange Feed End");
-
+    private readonly GQIDateTimeColumn _timeFeedStart = new GQIDateTimeColumn("TimeRange Feed Start");
+    private readonly GQIDateTimeColumn _timeFeedEnd = new GQIDateTimeColumn("TimeRange Feed End");
 
     private GQIEditableDateTimeColumn _startColumn;
     private GQIEditableDateTimeColumn _endColumn;
-    private TimeSpan _TimeRangeBefore;
-    private TimeSpan _TimeRangeAfter;
-
-
+    private TimeSpan _timeRangeBefore;
+    private TimeSpan _timeRangeAfter;
 
     public GQIArgument[] GetInputArguments()
     {
-        return new GQIArgument[] { _startColumnArg, _endColumnArg, _HoursBeforeColumnArg, _HoursAfterColumnArg };
+        return new GQIArgument[] { _startColumnArg, _endColumnArg, _hoursBeforeColumnArg, _hoursAfterColumnArg };
     }
 
     public OnArgumentsProcessedOutputArgs OnArgumentsProcessed(OnArgumentsProcessedInputArgs args)
@@ -30,38 +27,32 @@ public class TimeRangeExtending : IGQIRowOperator, IGQIInputArguments, IGQIColum
         _startColumn = args.GetArgumentValue(_startColumnArg) as GQIEditableDateTimeColumn;
         _endColumn = args.GetArgumentValue(_endColumnArg) as GQIEditableDateTimeColumn;
 
-        _TimeRangeBefore = new TimeSpan(args.GetArgumentValue(_HoursBeforeColumnArg), 0, 0);
-        _TimeRangeAfter = new TimeSpan(args.GetArgumentValue(_HoursAfterColumnArg), 0, 0);
+        _timeRangeBefore = new TimeSpan(args.GetArgumentValue(_hoursBeforeColumnArg), 0, 0);
+        _timeRangeAfter = new TimeSpan(args.GetArgumentValue(_hoursAfterColumnArg), 0, 0);
 
         return new OnArgumentsProcessedOutputArgs();
     }
 
     public void HandleColumns(GQIEditableHeader header)
     {
-        header.AddColumns(_TimeFeedStart);
-        header.AddColumns(_TimeFeedEnd);
+        header.AddColumns(_timeFeedStart);
+        header.AddColumns(_timeFeedEnd);
     }
 
     public void HandleRow(GQIEditableRow row)
     {
         try
         {
-            DateTime start = (row.GetValue(_startColumn) - _TimeRangeBefore);
-            DateTime end = (row.GetValue(_endColumn) + _TimeRangeAfter);
+            DateTime start = row.GetValue(_startColumn) - _timeRangeBefore;
+            DateTime end = row.GetValue(_endColumn) + _timeRangeAfter;
 
             // Max out to now
             if (end > DateTime.UtcNow)
                 end = DateTime.UtcNow;
 
             // in case you want to have the updated values in the same columns
-            row.SetValue<DateTime>(_TimeFeedStart, start);
-            row.SetValue<DateTime>(_TimeFeedEnd, end);
-
-            // in case we would support multiple timerange feeds at some point
-            //var timeRangeMetadata = new TimeRangeMetadata {StartTime = start -_TimeRangeBefore, EndTime = end + _TimeRangeAfter};
-            /* if (row.Metadata != null && row.Metadata.Metadata != null)
-                AddItemToArray(row.Metadata.Metadata, timeRangeMetadata);*/
-
+            row.SetValue<DateTime>(_timeFeedStart, start);
+            row.SetValue<DateTime>(_timeFeedEnd, end);
 
             if (row.Metadata != null && row.Metadata.Metadata != null)
             {
@@ -75,25 +66,8 @@ public class TimeRangeExtending : IGQIRowOperator, IGQIInputArguments, IGQIColum
                 }
             }
         }
-        catch (Exception ex) { }
+        catch (Exception)
+		{
+		}
     }
-
-
-    public static RowMetadataBase[] AddItemToArray(RowMetadataBase[] array, RowMetadataBase newItem)
-    {
-        // Create a new array with one extra slot
-        RowMetadataBase[] newArray = new RowMetadataBase[array.Length + 1];
-
-        // Copy existing items to the new array
-        for (int i = 0; i < array.Length; i++)
-        {
-            newArray[i] = array[i];
-        }
-
-        // Add the new item to the end of the new array
-        newArray[array.Length] = newItem;
-
-        return newArray;
-    }
-
 }
