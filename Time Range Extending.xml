@@ -5,7 +5,7 @@
 	<Type>Automation</Type>
 	<Author>SKYLINE2\PVC</Author>
 	<CheckSets>FALSE</CheckSets>
-	<Folder>AI/GQIO</Folder>
+	<Folder>GQI/Operators</Folder>
 
 	<Protocols>
 	</Protocols>
